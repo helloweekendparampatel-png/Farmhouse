@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { PrismaClient, Role } from '@prisma/client';
+import { populateFarmSlugs } from './slug-generator';
 
 const prisma = new PrismaClient();
 
@@ -26,6 +27,9 @@ async function main() {
   } else {
     console.log('Admin already exists, skipping user seed');
   }
+
+  // Populate slugs for all farms without slugs
+  await populateFarmSlugs();
 }
 
 main()
