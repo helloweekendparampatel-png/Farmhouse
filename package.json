@@ -5,11 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "db:migrate": "prisma db push --accept-data-loss",
-    "db:seed": "ts-node --transpile-only prisma/seed.ts",
+    "db:seed": "ts-node --project tsconfig.prisma.json prisma/seed.ts",
     "build": "prisma generate && npm run db:seed && npm run db:migrate && next build",
     "start": "next start",
     "lint": "next lint",
-    "prisma:seed": "ts-node --transpile-only prisma/seed.ts",
+    "prisma:seed": "ts-node --project tsconfig.prisma.json prisma/seed.ts",
     "format": "prettier --write \"app/**/*.{ts,tsx,js,jsx,css,json}\""
   },
   "dependencies": {
