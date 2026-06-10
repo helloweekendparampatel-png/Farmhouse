@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(USER)
+  farms     Farm[]   @relation("UserFarms")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Farm {
+  id           String        @id @default(uuid())
+  slug         String?       @unique
+  name         String
+  thumbnailUrl String?
+  location     String?
+  description  String?
+  price        String?
+  originalPrice String?
+  rating       Float?
+  reviews      Int?
+  capacity     String?
+  features     String[]
+  amenities    String[]
+  facilities   String[]
+  pricing      Json?
+  rules        String[]
+  contactPhone String?
+  contactEmail String?
+  isPopular    Boolean       @default(false)
+  discount     String?
+  weekdayPrice String?
+  weekendPrice String?
+  ownerId      String
+  owner        User          @relation("UserFarms", fields: [ownerId], references: [id])
+  images       FarmImage[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Photography {
+  id           String             @id @default(uuid())
+  title        String
+  thumbnailUrl String?
+  images       PhotographyImage[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+}
+
+model PhotographyImage {
+  id            String      @id @default(uuid())
+  imageUrl      String
+  photographyId String
+  photography   Photography @relation(fields: [photographyId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Decoration {
+  id           String            @id @default(uuid())
+  title        String
+  thumbnailUrl String?
+  images       DecorationImage[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+model DecorationImage {
+  id           String     @id @default(uuid())
+  imageUrl     String
+  decorationId String
+  decoration   Decoration @relation(fields: [decorationId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model FarmImage {
+  id        String   @id @default(uuid())
+  imageUrl  String
+  farmId    String
+  farm      Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
