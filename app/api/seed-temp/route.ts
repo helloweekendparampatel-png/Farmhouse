@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/prisma/client';
 import { farmhouses } from '@/app/constant';
-import { Role } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
     const admin = await prisma.user.findFirst({
-      where: { role: Role.ADMIN },
+      where: { role: 'ADMIN' },
     });
 
     if (!admin) {
@@ -19,7 +18,7 @@ export async function GET() {
     }
 
     // const created = await prisma.$transaction(
-    //   async (tx) => {
+    //   async (tx: any) => {
     //     const results = [];
     //     for (const f of farmhouses) {
     //       const name = (f.name ?? '').trim();
