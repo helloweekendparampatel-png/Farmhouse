@@ -88,6 +88,8 @@ export default function NewFarmPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const normalizedFieldValue = (value: unknown): string => String(value ?? '').trim();
+
   useEffect(() => {
     if (!loading && !user) {
       router.replace('/login');
@@ -168,41 +170,49 @@ export default function NewFarmPage() {
           .split(/\n/g)
           .map((s: string) => s.trim())
           .filter(Boolean);
-        const rules = values.rulesText
+        const rules = normalizedFieldValue(values.rulesText)
           .split(/\n/g)
           .map((s: string) => s.trim())
           .filter(Boolean);
 
         const pricing =
-          values.weekdayPrice || values.weekendPrice
+          normalizedFieldValue(values.weekdayPrice) || normalizedFieldValue(values.weekendPrice)
             ? {
-                weekday: values.weekdayPrice ? { '24 Hours': values.weekdayPrice } : {},
-                weekend: values.weekendPrice ? { '24 Hours': values.weekendPrice } : {},
+                weekday: normalizedFieldValue(values.weekdayPrice)
+                  ? { '24 Hours': normalizedFieldValue(values.weekdayPrice) }
+                  : {},
+                weekend: normalizedFieldValue(values.weekendPrice)
+                  ? { '24 Hours': normalizedFieldValue(values.weekendPrice) }
+                  : {},
               }
             : undefined;
 
         await apiPost('/farms', token, {
           farms: [
             {
-              name: values.name.trim(),
-              location: values.location.trim(),
-              description: values.description.trim(),
-              price: values.price.trim(),
-              originalPrice: values.originalPrice.trim(),
-              rating: values.rating.trim() ? Number(values.rating.trim()) : undefined,
-              reviews: values.reviews.trim() ? Number(values.reviews.trim()) : undefined,
-              capacity: values.capacity.trim(),
+              name: normalizedFieldValue(values.name),
+              location: normalizedFieldValue(values.location),
+              description: normalizedFieldValue(values.description),
+              price: normalizedFieldValue(values.price),
+              originalPrice: normalizedFieldValue(values.originalPrice),
+              rating: normalizedFieldValue(values.rating)
+                ? Number(normalizedFieldValue(values.rating))
+                : undefined,
+              reviews: normalizedFieldValue(values.reviews)
+                ? Number(normalizedFieldValue(values.reviews))
+                : undefined,
+              capacity: normalizedFieldValue(values.capacity),
               features,
               amenities: amenitiesPayload,
               facilities,
               pricing,
               rules,
-              contactPhone: values.contactPhone.trim(),
-              contactEmail: values.contactEmail.trim(),
+              contactPhone: normalizedFieldValue(values.contactPhone),
+              contactEmail: normalizedFieldValue(values.contactEmail),
               isPopular: values.isPopular,
-              discount: values.discount.trim() || undefined,
-              weekdayPrice: values.weekdayPrice.trim(),
-              weekendPrice: values.weekendPrice.trim(),
+              discount: normalizedFieldValue(values.discount) || undefined,
+              weekdayPrice: normalizedFieldValue(values.weekdayPrice),
+              weekendPrice: normalizedFieldValue(values.weekendPrice),
               thumbnailImageUrl,
               photoImageUrls,
             },

@@ -1,5 +1,10 @@
 import { normalizeAmenitiesForStorage, parseStoredAmenity, type AmenityPayload } from './amenities';
 
+function normalizeFieldString(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value).trim();
+}
+
 /**
  * Parses a money-like string after stripping common currency symbols and thousands separators.
  * Accepts only digits and a single optional decimal point (e.g. 5000, 5000.50, 5,000).
@@ -68,8 +73,8 @@ export type FarmFormStrings = {
   discount: string;
 };
 
-export function validateRequiredMonetaryField(value: string, label: string): string | undefined {
-  const s = value.trim();
+export function validateRequiredMonetaryField(value: unknown, label: string): string | undefined {
+  const s = normalizeFieldString(value);
   if (!s) return `${label} is required.`;
   if (s.length > FARM_LIMITS.price) return `${label} is too long.`;
   const n = parseMoneyAmount(s);
@@ -80,8 +85,8 @@ export function validateRequiredMonetaryField(value: string, label: string): str
   return undefined;
 }
 
-export function validateWeekdayOrWeekendPrice(value: string, label: string): string | undefined {
-  const s = value.trim();
+export function validateWeekdayOrWeekendPrice(value: unknown, label: string): string | undefined {
+  const s = normalizeFieldString(value);
   if (!s) return `${label} is required.`;
   if (s.length > FARM_LIMITS.price) return `${label} is too long.`;
 
@@ -106,8 +111,8 @@ export function validateWeekdayOrWeekendPrice(value: string, label: string): str
   return undefined;
 }
 
-export function validateCapacityField(value: string, fieldLabel = 'Capacity'): string | undefined {
-  const s = value.trim();
+export function validateCapacityField(value: unknown, fieldLabel = 'Capacity'): string | undefined {
+  const s = normalizeFieldString(value);
   if (!s) return `${fieldLabel} is required.`;
   if (s.length > FARM_LIMITS.capacity)
     return `${fieldLabel} must be ${FARM_LIMITS.capacity} characters or less.`;
@@ -118,8 +123,8 @@ export function validateCapacityField(value: string, fieldLabel = 'Capacity'): s
 }
 
 /** Optional rating: empty ok; otherwise digits and at most one decimal, range 0–5. */
-export function validateOptionalRating(value: string): string | undefined {
-  const t = value.trim();
+export function validateOptionalRating(value: unknown): string | undefined {
+  const t = normalizeFieldString(value);
   if (!t) return undefined;
   if (!/^\d+(\.\d+)?$/.test(t))
     return 'Rating must contain numbers only (optional one decimal point).';
@@ -130,8 +135,8 @@ export function validateOptionalRating(value: string): string | undefined {
 }
 
 /** Optional reviews: empty ok; otherwise digits only, whole number ≥ 0. */
-export function validateOptionalReviews(value: string): string | undefined {
-  const t = value.trim();
+export function validateOptionalReviews(value: unknown): string | undefined {
+  const t = normalizeFieldString(value);
   if (!t) return undefined;
   if (!/^\d+$/.test(t)) return 'Reviews count must be a whole number (digits only).';
   const n = parseInt(t, 10);
@@ -139,16 +144,16 @@ export function validateOptionalReviews(value: string): string | undefined {
   return undefined;
 }
 
-export function validateDiscountOptional(value: string): string | undefined {
-  const s = value.trim();
+export function validateDiscountOptional(value: unknown): string | undefined {
+  const s = normalizeFieldString(value);
   if (!s) return undefined;
   if (s.length > FARM_LIMITS.discount)
     return `Discount label must be ${FARM_LIMITS.discount} characters or less.`;
   return undefined;
 }
 
-export function validateContactEmail(value: string): string | undefined {
-  const s = value.trim();
+export function validateContactEmail(value: unknown): string | undefined {
+  const s = normalizeFieldString(value);
   if (!s) return 'Contact email is required.';
   if (!isValidEmailFormat(s)) return 'Enter a valid email address.';
   return undefined;
@@ -166,8 +171,8 @@ export function normalizeIndianMobileDigits(raw: string): string {
   return digits;
 }
 
-export function validateContactPhone(value: string): string | undefined {
-  const s = value.trim();
+export function validateContactPhone(value: unknown): string | undefined {
+  const s = normalizeFieldString(value);
   if (!s) return 'Contact phone is required.';
   if (s.length > FARM_LIMITS.phone) return 'Phone number is too long.';
   if (!/^[\d+\s().-]+$/.test(s)) {
@@ -181,12 +186,12 @@ export function validateContactPhone(value: string): string | undefined {
 }
 
 export function validateRequiredText(
-  value: string,
+  value: unknown,
   fieldLabel: string,
   maxLen: number,
   minLen = 1,
 ): string | undefined {
-  const s = value.trim();
+  const s = normalizeFieldString(value);
   if (!s) return `${fieldLabel} is required.`;
   if (s.length < minLen)
     return `${fieldLabel} must be at least ${minLen} character${minLen === 1 ? '' : 's'}.`;
@@ -194,8 +199,8 @@ export function validateRequiredText(
   return undefined;
 }
 
-export function validateFeaturesFromText(featuresText: string): string | undefined {
-  const features = featuresText
+export function validateFeaturesFromText(featuresText: unknown): string | undefined {
+  const features = normalizeFieldString(featuresText)
     .split(/[,\n]/g)
     .map((x) => x.trim())
     .filter(Boolean);
