@@ -6,8 +6,7 @@ export function parseApiErrorMessage(text: string, fallback = 'Something went wr
   const trimmed = (text ?? '').trim();
   if (!trimmed) return fallback;
 
-  const looksJson =
-    (trimmed.startsWith('{') && trimmed.includes('}')) || trimmed.startsWith('[');
+  const looksJson = (trimmed.startsWith('{') && trimmed.includes('}')) || trimmed.startsWith('[');
   if (looksJson) {
     try {
       const j = JSON.parse(trimmed) as Record<string, unknown>;

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Camera, ChevronRight, Flower2, LayoutDashboard, LogOut, Trees, Users } from 'lucide-react';
+import { Camera, Flower2, LayoutDashboard, LogOut, Trees, Users } from 'lucide-react';
 import { useAuth } from '../lib/auth-context';
 
 const links = [
@@ -57,7 +57,6 @@ export function Sidebar({
                   <link.icon size={16} />
                   <span>{link.label}</span>
                 </span>
-                <ChevronRight size={14} className="sidebar-link__chevron" />
               </Link>
             ))}
           </nav>

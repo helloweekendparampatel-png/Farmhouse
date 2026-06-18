@@ -117,8 +117,7 @@ export function removedImageUrlsAfterPatch(params: {
   for (const x of params.oldImageUrls) oldSet.add(x);
   if (params.oldThumbnailUrl) oldSet.add(params.oldThumbnailUrl);
 
-  const gallery =
-    params.newImageUrls !== undefined ? params.newImageUrls : params.oldImageUrls;
+  const gallery = params.newImageUrls !== undefined ? params.newImageUrls : params.oldImageUrls;
   const newSet = new Set<string>();
   for (const x of gallery) newSet.add(x);
   const newThumb =

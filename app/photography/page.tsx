@@ -220,21 +220,20 @@ export default function PhotographyPage() {
               {imageFiles.length > 0 ? (
                 <>
                   <p className="field-hint" style={{ marginTop: '0.35rem' }}>
-                    {imageFiles.length} image{imageFiles.length === 1 ? '' : 's'} selected — use × to
-                    remove.
+                    {imageFiles.length} image{imageFiles.length === 1 ? '' : 's'} selected — use ×
+                    to remove.
                   </p>
                   <div className="preview-thumb-row">
                     {imageFiles.map((file, i) => (
-                      <div
-                        key={`${file.name}-${file.size}-${i}`}
-                        className="preview-thumb"
-                      >
+                      <div key={`${file.name}-${file.size}-${i}`} className="preview-thumb">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={imagePreviewUrls[i]} alt="" />
                         <button
                           type="button"
                           className="preview-thumb-remove"
-                          onClick={() => setImageFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                          onClick={() =>
+                            setImageFiles((prev) => prev.filter((_, idx) => idx !== i))
+                          }
                           aria-label={`Remove ${file.name}`}
                         >
                           <X size={14} strokeWidth={2.5} />

@@ -7,6 +7,7 @@ import { useAuth } from '../lib/auth-context';
 import { apiDelete, apiGet } from '../lib/backend-api';
 import { errorMessageFromUnknown } from '../lib/api-errors';
 import { isTruncatedInList, truncateForList } from '../lib/text';
+import { formatCurrency, formatCapacity } from '../lib/format';
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 import ConfirmDialog from '../ components/ConfirmDialog';
 import { mediaSrc } from '../lib/media-url';
@@ -59,10 +60,7 @@ export default function FarmsPage() {
       const res = await apiGet<{
         data: Farm[];
         meta: { total: number; totalPages: number };
-      }>(
-        `/farms?page=${page}&limit=15&search=${encodeURIComponent(debouncedSearch)}`,
-        token,
-      );
+      }>(`/farms?page=${page}&limit=15&search=${encodeURIComponent(debouncedSearch)}`, token);
       setFarms(res.data);
       setTotalPages(res.meta.totalPages);
       setTotalMatching(res.meta.total);
@@ -192,8 +190,8 @@ export default function FarmsPage() {
                     >
                       {truncateForList(farm.description, descPreviewLen)}
                     </td>
-                    <td>{farm.price || '—'}</td>
-                    <td>{farm.capacity || '—'}</td>
+                    <td>{formatCurrency(farm.price)}</td>
+                    <td>{formatCapacity(farm.capacity)}</td>
                     <td>{farm.rating ?? '—'}</td>
                     <td>
                       <span
@@ -234,9 +232,7 @@ export default function FarmsPage() {
                               className="table-action-btn table-action-btn--danger"
                               title="Delete"
                               aria-label="Delete"
-                                onClick={() =>
-                                  setConfirmDeleteSlug(farm.slug ?? farm.id)
-                                }
+                              onClick={() => setConfirmDeleteSlug(farm.slug ?? farm.id)}
                             >
                               <Trash2 size={16} strokeWidth={2.25} />
                             </button>
