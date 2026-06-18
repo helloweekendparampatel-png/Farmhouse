@@ -6,7 +6,12 @@ import { Pool, type PoolConfig } from 'pg';
 const connectionString = process.env.DATABASE_URL;
 
 function createPgPool(): Pool {
-  const config: PoolConfig = { connectionString };
+  const config: PoolConfig = {
+    connectionString,
+    max: 10,
+    connectionTimeoutMillis: 10000,
+    idleTimeoutMillis: 10000,
+  };
   if (connectionString) {
     const urlWantsTls = /\bsslmode=(require|verify-full|verify-ca)\b/i.test(connectionString);
     // Render sets RENDER=true; hosted Postgres needs TLS and node-pg often requires relaxed cert check.
