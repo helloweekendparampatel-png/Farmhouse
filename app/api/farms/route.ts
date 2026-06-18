@@ -98,76 +98,81 @@ export async function POST(req: NextRequest) {
   const ownerId = payload.sub;
 
   try {
-    const created = await prisma.$transaction(async (tx) => {
-      const allSlugs = await tx.farm.findMany({
-        select: { slug: true },
-        where: { slug: { startsWith: 'HW' } },
-      });
+    const results = await prisma.$transaction(
+      async (tx) => {
+        const allSlugs = await tx.farm.findMany({
+          select: { slug: true },
+          where: { slug: { startsWith: 'HW' } },
+        });
 
-      let currentMaxSlugNumber = 100;
-      for (const item of allSlugs) {
-        if (item.slug) {
-          const numStr = item.slug.replace('HW', '');
-          const num = parseInt(numStr, 10);
-          if (!isNaN(num) && num > currentMaxSlugNumber) {
-            currentMaxSlugNumber = num;
+        let currentMaxSlugNumber = 100;
+        for (const item of allSlugs) {
+          if (item.slug) {
+            const numStr = item.slug.replace('HW', '');
+            const num = parseInt(numStr, 10);
+            if (!isNaN(num) && num > currentMaxSlugNumber) {
+              currentMaxSlugNumber = num;
+            }
           }
         }
-      }
 
-      const results = [];
-      for (const f of body.farms!) {
-        const name = (f.name ?? '').trim();
-        const payloadErr = validateFarmCreatePayload(f);
-        if (payloadErr) {
-          throw new Error(payloadErr);
+        const createdFarms = [];
+        for (const f of body.farms!) {
+          const name = (f.name ?? '').trim();
+          const payloadErr = validateFarmCreatePayload(f);
+          if (payloadErr) {
+            throw new Error(payloadErr);
+          }
+
+          const photoUrls = (Array.isArray(f.photoImageUrls) ? f.photoImageUrls : [])
+            .map((u) => (typeof u === 'string' ? u.trim() : ''))
+            .filter(Boolean);
+
+          const thumbnailUrl =
+            typeof f.thumbnailImageUrl === 'string' ? f.thumbnailImageUrl.trim() : '';
+
+          const nextSlug = `HW${++currentMaxSlugNumber}`;
+
+          const farm = await tx.farm.create({
+            data: {
+              slug: nextSlug,
+              name,
+              thumbnailUrl,
+              location: f.location ?? undefined,
+              description: f.description ?? undefined,
+              ownerId,
+              images: {
+                create: photoUrls.map((url) => ({ imageUrl: url })),
+              },
+              price: f.price ?? undefined,
+              originalPrice: f.originalPrice ?? undefined,
+              rating: f.rating ?? undefined,
+              reviews: f.reviews ?? undefined,
+              capacity: f.capacity ?? undefined,
+              features: f.features ?? [],
+              amenities: normalizeAmenitiesForStorage(f.amenities),
+              facilities: f.facilities ?? [],
+              pricing: f.pricing ?? undefined,
+              rules: f.rules ?? [],
+              contactPhone: f.contactPhone ?? undefined,
+              contactEmail: f.contactEmail ?? undefined,
+              isPopular: f.isPopular ?? false,
+              discount: f.discount ?? undefined,
+              weekdayPrice: f.weekdayPrice ?? undefined,
+              weekendPrice: f.weekendPrice ?? undefined,
+            },
+          });
+          createdFarms.push(farm);
         }
 
-        const photoUrls = (Array.isArray(f.photoImageUrls) ? f.photoImageUrls : [])
-          .map((u) => (typeof u === 'string' ? u.trim() : ''))
-          .filter(Boolean);
+        return createdFarms;
+      },
+      { timeout: 15000 },
+    );
 
-        const thumbnailUrl =
-          typeof f.thumbnailImageUrl === 'string' ? f.thumbnailImageUrl.trim() : '';
-
-        const nextSlug = `HW${++currentMaxSlugNumber}`;
-
-        const farm = await tx.farm.create({
-          data: {
-            slug: nextSlug,
-            name,
-            thumbnailUrl,
-            location: f.location ?? undefined,
-            description: f.description ?? undefined,
-            ownerId,
-            images: {
-              create: photoUrls.map((url) => ({ imageUrl: url })),
-            },
-            price: f.price ?? undefined,
-            originalPrice: f.originalPrice ?? undefined,
-            rating: f.rating ?? undefined,
-            reviews: f.reviews ?? undefined,
-            capacity: f.capacity ?? undefined,
-            features: f.features ?? [],
-            amenities: normalizeAmenitiesForStorage(f.amenities),
-            facilities: f.facilities ?? [],
-            pricing: f.pricing ?? undefined,
-            rules: f.rules ?? [],
-            contactPhone: f.contactPhone ?? undefined,
-            contactEmail: f.contactEmail ?? undefined,
-            isPopular: f.isPopular ?? false,
-            discount: f.discount ?? undefined,
-            weekdayPrice: f.weekdayPrice ?? undefined,
-            weekendPrice: f.weekendPrice ?? undefined,
-          },
-        });
-        results.push(farm);
-      }
-      return results;
-    });
-
-    return NextResponse.json(created, { status: 201 });
+    return NextResponse.json(results, { status: 201 });
   } catch (err: any) {
+    console.error('Farm create failed:', err);
     return NextResponse.json(
       { message: err?.message ?? 'Failed to create farm(s)' },
       { status: 400 },
