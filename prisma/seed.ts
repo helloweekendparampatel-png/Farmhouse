@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from './client';
-import { populateFarmSlugs } from './slug-generator';
 
 async function main() {
   const email = 'admin@farmhouse.local';
@@ -28,7 +27,6 @@ async function main() {
     }
 
     // Populate slugs for all farms without slugs
-    await populateFarmSlugs();
   } catch (error: any) {
     // If database is not reachable (e.g., local development), skip seeding
     if (error?.code === 'P1001' || error?.code === 'ECONNREFUSED') {
