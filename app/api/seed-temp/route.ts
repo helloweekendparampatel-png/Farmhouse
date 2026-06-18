@@ -47,7 +47,15 @@ export async function GET() {
     //           reviews: f.reviews ?? undefined,
     //           capacity: f.capacity ?? undefined,
     //           features: f.features ?? [],
-    //           amenities: f.amenities?.map((a: any) => a.name) ?? [],
+    //           // Store amenities as structured objects: { icon: string, name: string }
+    //           amenities:
+    //             f.amenities?.map((a: any) => ({
+    //               icon:
+    //                 typeof a.icon === 'function'
+    //                   ? a.icon.name ?? 'Sparkles'
+    //                   : String(a.icon ?? 'Sparkles'),
+    //               name: String(a.name ?? '').trim(),
+    //             })) ?? [],
     //           facilities: f.facilities ?? [],
     //           pricing: f.pricing ?? undefined,
     //           rules: f.rules ?? [],

@@ -7,7 +7,11 @@ import { errorMessageFromUnknown } from '../../../lib/api-errors';
 import { useAuth } from '../../../lib/auth-context';
 import { apiGet, apiPatch } from '../../../lib/backend-api';
 import { uploadAdminImageFile, uploadAdminImageFiles } from '../../../lib/admin-image-upload';
-import { collectEditFarmFieldErrors, type FarmFormStrings } from '../../../lib/farm-validation';
+import {
+  collectEditFarmFieldErrors,
+  type FarmFormStrings,
+  parseMoneyAmount,
+} from '../../../lib/farm-validation';
 import { parseStoredAmenity, type AmenityItem } from '../../../lib/amenities';
 import { IconPicker } from '../../../components/IconPicker';
 import { AmenityLucideIcon } from '../../../components/AmenityLucideIcon';
@@ -28,7 +32,7 @@ type FarmDetail = {
   reviews?: number;
   capacity?: string;
   features: string[];
-  amenities: string[];
+  amenities: AmenityItem[];
   facilities: string[];
   pricing?: any;
   rules: string[];
@@ -121,18 +125,38 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
         setName(data.name ?? '');
         setLocation(data.location ?? '');
         setDescription(data.description ?? '');
-        setPrice(data.price ?? '');
-        setOriginalPrice(data.originalPrice ?? '');
+        const normalizeMoney = (raw?: string | null) => {
+          if (!raw) return '';
+          const n = parseMoneyAmount(String(raw));
+          if (n !== null) return String(n);
+          const m = String(raw).match(/(\d+(?:\.\d+)?)/);
+          if (m) return m[1].replace(/,/g, '');
+          return String(raw)
+            .trim()
+            .replace(/^[\s$€£₹]+/u, '')
+            .replace(/,/g, '');
+        };
+
+        const normalizeRangeMoney = (raw?: string | null) => {
+          if (!raw) return '';
+          return String(raw).trim().replace(/[$€£₹]/gu, '').replace(/,/g, '');
+        };
+
+        setPrice(normalizeMoney(data.price ?? ''));
+        setOriginalPrice(normalizeMoney(data.originalPrice ?? ''));
         setRating(data.rating !== undefined && data.rating !== null ? String(data.rating) : '');
         setReviews(data.reviews !== undefined && data.reviews !== null ? String(data.reviews) : '');
-        setCapacity(data.capacity ?? '');
+        // capacity should be stored as digits only; extract first number if original contained text
+        const cap = data.capacity ?? '';
+        const capMatch = String(cap).match(/(\d+)/);
+        setCapacity(capMatch ? capMatch[1] : String(cap).trim());
         setFeaturesText((data.features ?? []).join('\n'));
         const amenityRows = (data.amenities ?? []).map((raw) => parseStoredAmenity(raw));
         setAmenities(amenityRows.length ? amenityRows : [{ icon: 'Wifi', name: '' }]);
         setFacilitiesText((data.facilities ?? []).join('\n'));
         setRulesText((data.rules ?? []).join('\n'));
-        setWeekdayPrice(data.weekdayPrice ?? '');
-        setWeekendPrice(data.weekendPrice ?? '');
+        setWeekdayPrice(normalizeRangeMoney(data.weekdayPrice ?? ''));
+        setWeekendPrice(normalizeRangeMoney(data.weekendPrice ?? ''));
         setContactPhone(data.contactPhone ?? '');
         setContactEmail(data.contactEmail ?? '');
         setDiscount(data.discount ?? '');
@@ -237,8 +261,7 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
         }
       }
       const galleryUrls = [...keptUrls, ...uploadedGalleryUrls];
-      const shouldUpdateGallery =
-        galleryTouched || newGalleryFiles.length > 0;
+      const shouldUpdateGallery = galleryTouched || newGalleryFiles.length > 0;
       if (shouldUpdateGallery) {
         if (galleryUrls.length < 10) {
           setFormError(
@@ -340,6 +363,10 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
                 Display Price <span className="field-required">*</span>
               </span>
               <input
+                type="number"
+                min={0}
+                step={0.01}
+                inputMode="decimal"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 className={err('price') ? 'field-error' : ''}
@@ -351,6 +378,10 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
                 Original Price <span className="field-required">*</span>
               </span>
               <input
+                type="number"
+                min={0}
+                step={0.01}
+                inputMode="decimal"
                 value={originalPrice}
                 onChange={(e) => setOriginalPrice(e.target.value)}
                 className={err('originalPrice') ? 'field-error' : ''}
@@ -389,6 +420,11 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
                 Capacity <span className="field-required">*</span>
               </span>
               <input
+                type="number"
+                min={1}
+                max={99999}
+                step={1}
+                inputMode="numeric"
                 value={capacity}
                 onChange={(e) => setCapacity(e.target.value)}
                 className={err('capacity') ? 'field-error' : ''}
@@ -493,6 +529,8 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
                 Weekday 24h Price <span className="field-required">*</span>
               </span>
               <input
+                type="text"
+                placeholder="e.g. 3500-5000"
                 value={weekdayPrice}
                 onChange={(e) => setWeekdayPrice(e.target.value)}
                 className={err('weekdayPrice') ? 'field-error' : ''}
@@ -506,6 +544,8 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
                 Weekend 24h Price <span className="field-required">*</span>
               </span>
               <input
+                type="text"
+                placeholder="e.g. 6000-8000"
                 value={weekendPrice}
                 onChange={(e) => setWeekendPrice(e.target.value)}
                 className={err('weekendPrice') ? 'field-error' : ''}
@@ -648,7 +688,9 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
 
             <div className="form-field full-width">
               <span className="field-label">Thumbnail</span>
-              <p className="field-hint">One image — listing preview. Leave unchanged or pick a new file to replace.</p>
+              <p className="field-hint">
+                One image — listing preview. Leave unchanged or pick a new file to replace.
+              </p>
               {existingThumbnailUrl && !thumbnailPreviewUrl && (
                 <div style={{ marginBottom: '0.65rem' }}>
                   <p className="field-hint">Current thumbnail</p>
@@ -671,7 +713,9 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
               />
               {thumbnailPreviewUrl && thumbnailFile && (
                 <div style={{ marginTop: '0.65rem' }}>
-                  <p className="field-hint">New thumbnail preview — click × to cancel replacement.</p>
+                  <p className="field-hint">
+                    New thumbnail preview — click × to cancel replacement.
+                  </p>
                   <div className="photo-upload-preview-grid" style={{ maxWidth: 220 }}>
                     <div className="photo-upload-preview-item">
                       <button
@@ -682,11 +726,7 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
                       >
                         <X size={16} strokeWidth={2.5} />
                       </button>
-                      <img
-                        src={thumbnailPreviewUrl}
-                        alt=""
-                        className="photo-upload-preview-img"
-                      />
+                      <img src={thumbnailPreviewUrl} alt="" className="photo-upload-preview-img" />
                     </div>
                   </div>
                 </div>

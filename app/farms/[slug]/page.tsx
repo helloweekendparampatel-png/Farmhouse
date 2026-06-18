@@ -7,6 +7,8 @@ import { errorMessageFromUnknown } from '../../lib/api-errors';
 import { useAuth } from '../../lib/auth-context';
 import { apiGet } from '../../lib/backend-api';
 import { parseStoredAmenity } from '../../lib/amenities';
+import type { AmenityItem } from '../../lib/amenities';
+import { formatCurrency, formatCapacity } from '../../lib/format';
 import { AmenityLucideIcon } from '../../components/AmenityLucideIcon';
 import { mediaSrc } from '../../lib/media-url';
 import { HeaderLink, PageIntro, SectionCard, StatCard } from '../../ui/admin-ui';
@@ -24,7 +26,7 @@ type FarmDetail = {
   reviews?: number;
   capacity?: string;
   features: string[];
-  amenities: string[];
+  amenities: AmenityItem[];
   facilities: string[];
   pricing?: any;
   rules: string[];
@@ -105,14 +107,17 @@ export default function FarmDetailPage({ params }: { params: { slug: string } })
           </div>
 
           {farm.thumbnailUrl ? (
-            <SectionCard
-              title="Thumbnail"
-              description="Primary preview image for this listing."
-            >
+            <SectionCard title="Thumbnail" description="Primary preview image for this listing.">
               <img
                 src={mediaSrc(farm.thumbnailUrl)}
                 alt=""
-                style={{ maxWidth: 320, width: '100%', height: 'auto', borderRadius: 12, display: 'block' }}
+                style={{
+                  maxWidth: 320,
+                  width: '100%',
+                  height: 'auto',
+                  borderRadius: 12,
+                  display: 'block',
+                }}
                 loading="eager"
                 decoding="async"
               />
@@ -159,11 +164,11 @@ export default function FarmDetailPage({ params }: { params: { slug: string } })
               </div>
               <div className="detail-card">
                 <strong>Display price</strong>
-                <span>{farm.price || '—'}</span>
+                <span>{formatCurrency(farm.price)}</span>
               </div>
               <div className="detail-card">
                 <strong>Original price</strong>
-                <span>{farm.originalPrice || '—'}</span>
+                <span>{formatCurrency(farm.originalPrice)}</span>
               </div>
               <div className="detail-card">
                 <strong>Rating / Reviews</strong>
@@ -174,15 +179,15 @@ export default function FarmDetailPage({ params }: { params: { slug: string } })
               </div>
               <div className="detail-card">
                 <strong>Capacity</strong>
-                <span>{farm.capacity || '—'}</span>
+                <span>{formatCapacity(farm.capacity)}</span>
               </div>
               <div className="detail-card">
                 <strong>Weekday 24h</strong>
-                <span>{farm.weekdayPrice || '—'}</span>
+                <span>{formatCurrency(farm.weekdayPrice)}</span>
               </div>
               <div className="detail-card">
                 <strong>Weekend 24h</strong>
-                <span>{farm.weekendPrice || '—'}</span>
+                <span>{formatCurrency(farm.weekendPrice)}</span>
               </div>
               <div className="detail-card">
                 <strong>Contact</strong>

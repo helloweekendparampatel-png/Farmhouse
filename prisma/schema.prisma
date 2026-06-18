@@ -29,13 +29,17 @@ model Farm {
   thumbnailUrl String?
   location     String?
   description  String?
+
+  
+
+  
   price        String?
   originalPrice String?
   rating       Float?
   reviews      Int?
   capacity     String?
   features     String[]
-  amenities    String[]
+  amenities    Json?
   facilities   String[]
   pricing      Json?
   rules        String[]

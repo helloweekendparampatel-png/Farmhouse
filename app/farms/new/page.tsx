@@ -7,10 +7,7 @@ import { Trash2, X } from 'lucide-react';
 import { errorMessageFromUnknown } from '../../lib/api-errors';
 import { useAuth } from '../../lib/auth-context';
 import { uploadAdminImageFile, uploadAdminImageFiles } from '../../lib/admin-image-upload';
-import {
-  collectCreateFarmFieldErrors,
-  type FarmFormStrings,
-} from '../../lib/farm-validation';
+import { collectCreateFarmFieldErrors, type FarmFormStrings } from '../../lib/farm-validation';
 import { apiPost } from '../../lib/backend-api';
 import type { AmenityItem } from '../../lib/amenities';
 import { IconPicker } from '../../components/IconPicker';
@@ -486,10 +483,8 @@ export default function NewFarmPage() {
             </span>
             <input
               name="weekdayPrice"
-              type="number"
-              min={0}
-              step={0.01}
-              inputMode="decimal"
+              type="text"
+              placeholder="e.g. 3500-5000"
               value={formik.values.weekdayPrice}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -503,10 +498,8 @@ export default function NewFarmPage() {
             </span>
             <input
               name="weekendPrice"
-              type="number"
-              min={0}
-              step={0.01}
-              inputMode="decimal"
+              type="text"
+              placeholder="e.g. 6000-8000"
               value={formik.values.weekendPrice}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
@@ -603,11 +596,7 @@ export default function NewFarmPage() {
                     >
                       <X size={16} strokeWidth={2.5} />
                     </button>
-                    <img
-                      src={thumbnailPreviewUrl}
-                      alt=""
-                      className="photo-upload-preview-img"
-                    />
+                    <img src={thumbnailPreviewUrl} alt="" className="photo-upload-preview-img" />
                   </div>
                 </div>
               </div>

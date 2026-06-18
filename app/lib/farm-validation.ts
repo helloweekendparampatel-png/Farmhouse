@@ -1,8 +1,4 @@
-import {
-  normalizeAmenitiesForStorage,
-  parseStoredAmenity,
-  type AmenityPayload,
-} from './amenities';
+import { normalizeAmenitiesForStorage, parseStoredAmenity, type AmenityPayload } from './amenities';
 
 /**
  * Parses a money-like string after stripping common currency symbols and thousands separators.
@@ -28,7 +24,12 @@ function isValidEmailFormat(s: string): boolean {
   if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(s)) return false;
   const [local, domain] = s.split('@');
   if (!local || !domain || local.length > 64 || domain.length > 253) return false;
-  if (local.startsWith('.') || local.endsWith('.') || domain.startsWith('.') || domain.endsWith('.')) {
+  if (
+    local.startsWith('.') ||
+    local.endsWith('.') ||
+    domain.startsWith('.') ||
+    domain.endsWith('.')
+  ) {
     return false;
   }
   return true;
@@ -79,10 +80,37 @@ export function validateRequiredMonetaryField(value: string, label: string): str
   return undefined;
 }
 
+export function validateWeekdayOrWeekendPrice(value: string, label: string): string | undefined {
+  const s = value.trim();
+  if (!s) return `${label} is required.`;
+  if (s.length > FARM_LIMITS.price) return `${label} is too long.`;
+
+  const parts = s.includes('-') ? s.split('-') : s.split(/\s+to\s+/i);
+  if (parts.length > 2) {
+    return `${label} must be a single amount or a range (e.g. 3500 or 3500-5000).`;
+  }
+
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (!trimmed) {
+      return `${label} range has an empty value.`;
+    }
+    const n = parseMoneyAmount(trimmed);
+    if (n === null) {
+      return `${label} must be a valid amount or range (numbers only or range like 3500-5000).`;
+    }
+    if (n === 0) {
+      return `${label} must be greater than zero.`;
+    }
+  }
+  return undefined;
+}
+
 export function validateCapacityField(value: string, fieldLabel = 'Capacity'): string | undefined {
   const s = value.trim();
   if (!s) return `${fieldLabel} is required.`;
-  if (s.length > FARM_LIMITS.capacity) return `${fieldLabel} must be ${FARM_LIMITS.capacity} characters or less.`;
+  if (s.length > FARM_LIMITS.capacity)
+    return `${fieldLabel} must be ${FARM_LIMITS.capacity} characters or less.`;
   if (!/^\d+$/.test(s)) return `${fieldLabel} must be a whole number (digits only, e.g. 12).`;
   const n = parseInt(s, 10);
   if (n < 1 || n > 99999) return `${fieldLabel} must be between 1 and 99999.`;
@@ -93,7 +121,8 @@ export function validateCapacityField(value: string, fieldLabel = 'Capacity'): s
 export function validateOptionalRating(value: string): string | undefined {
   const t = value.trim();
   if (!t) return undefined;
-  if (!/^\d+(\.\d+)?$/.test(t)) return 'Rating must contain numbers only (optional one decimal point).';
+  if (!/^\d+(\.\d+)?$/.test(t))
+    return 'Rating must contain numbers only (optional one decimal point).';
   const n = Number(t);
   if (Number.isNaN(n)) return 'Rating must be a valid number.';
   if (n < 0 || n > 5) return 'Rating must be between 0 and 5.';
@@ -113,7 +142,8 @@ export function validateOptionalReviews(value: string): string | undefined {
 export function validateDiscountOptional(value: string): string | undefined {
   const s = value.trim();
   if (!s) return undefined;
-  if (s.length > FARM_LIMITS.discount) return `Discount label must be ${FARM_LIMITS.discount} characters or less.`;
+  if (s.length > FARM_LIMITS.discount)
+    return `Discount label must be ${FARM_LIMITS.discount} characters or less.`;
   return undefined;
 }
 
@@ -158,7 +188,8 @@ export function validateRequiredText(
 ): string | undefined {
   const s = value.trim();
   if (!s) return `${fieldLabel} is required.`;
-  if (s.length < minLen) return `${fieldLabel} must be at least ${minLen} character${minLen === 1 ? '' : 's'}.`;
+  if (s.length < minLen)
+    return `${fieldLabel} must be at least ${minLen} character${minLen === 1 ? '' : 's'}.`;
   if (s.length > maxLen) return `${fieldLabel} must be ${maxLen} characters or less.`;
   return undefined;
 }
@@ -244,10 +275,10 @@ export function collectCreateFarmFieldErrors(
   const rulesErr = validateMultilineRequired(s.rulesText, 'Rules');
   if (rulesErr) errs.rulesText = rulesErr;
 
-  const wdErr = validateRequiredMonetaryField(s.weekdayPrice, 'Weekday 24h price');
+  const wdErr = validateWeekdayOrWeekendPrice(s.weekdayPrice, 'Weekday 24h price');
   if (wdErr) errs.weekdayPrice = wdErr;
 
-  const weErr = validateRequiredMonetaryField(s.weekendPrice, 'Weekend 24h price');
+  const weErr = validateWeekdayOrWeekendPrice(s.weekendPrice, 'Weekend 24h price');
   if (weErr) errs.weekendPrice = weErr;
 
   const phoneErr = validateContactPhone(s.contactPhone);
@@ -309,10 +340,10 @@ export function collectEditFarmFieldErrors(s: FarmFormStrings): Record<string, s
   const rulesErr = validateMultilineRequired(s.rulesText, 'Rules');
   if (rulesErr) errs.rulesText = rulesErr;
 
-  const wdErr = validateRequiredMonetaryField(s.weekdayPrice, 'Weekday 24h price');
+  const wdErr = validateWeekdayOrWeekendPrice(s.weekdayPrice, 'Weekday 24h price');
   if (wdErr) errs.weekdayPrice = wdErr;
 
-  const weErr = validateRequiredMonetaryField(s.weekendPrice, 'Weekend 24h price');
+  const weErr = validateWeekdayOrWeekendPrice(s.weekendPrice, 'Weekend 24h price');
   if (weErr) errs.weekendPrice = weErr;
 
   const phoneErr = validateContactPhone(s.contactPhone);
@@ -362,7 +393,12 @@ function validateFarmCorePayload(input: FarmCorePayload): string | null {
   const locErr = validateRequiredText(input.location ?? '', 'Location', FARM_LIMITS.location, 2);
   if (locErr) return locErr;
 
-  const descErr = validateRequiredText(input.description ?? '', 'Description', FARM_LIMITS.description, 10);
+  const descErr = validateRequiredText(
+    input.description ?? '',
+    'Description',
+    FARM_LIMITS.description,
+    10,
+  );
   if (descErr) return descErr;
 
   const p1 = validateRequiredMonetaryField(input.price ?? '', 'Display price');
@@ -384,27 +420,32 @@ function validateFarmCorePayload(input: FarmCorePayload): string | null {
   if (amenitiesStored.length === 0) {
     return 'At least one amenity with a name is required.';
   }
-  const amenityItems = amenitiesStored.map((raw) => parseStoredAmenity(raw));
-  const amErr = validateAmenityNames(amenityItems);
+  const amErr = validateAmenityNames(amenitiesStored);
   if (amErr) return amErr;
 
   const facilities = Array.isArray(input.facilities) ? input.facilities : [];
   if (!facilities.some((x) => String(x).trim())) {
     return 'At least one facility is required.';
   }
-  const facErr = validateMultilineRequired(facilities.map((x) => String(x).trim()).join('\n'), 'Facilities');
+  const facErr = validateMultilineRequired(
+    facilities.map((x) => String(x).trim()).join('\n'),
+    'Facilities',
+  );
   if (facErr) return facErr;
 
   const rules = Array.isArray(input.rules) ? input.rules : [];
   if (!rules.some((x) => String(x).trim())) {
     return 'At least one rule is required.';
   }
-  const rulesErr = validateMultilineRequired(rules.map((x) => String(x).trim()).join('\n'), 'Rules');
+  const rulesErr = validateMultilineRequired(
+    rules.map((x) => String(x).trim()).join('\n'),
+    'Rules',
+  );
   if (rulesErr) return rulesErr;
 
-  const wdErr = validateRequiredMonetaryField(input.weekdayPrice ?? '', 'Weekday 24h price');
+  const wdErr = validateWeekdayOrWeekendPrice(input.weekdayPrice ?? '', 'Weekday 24h price');
   if (wdErr) return wdErr;
-  const weErr = validateRequiredMonetaryField(input.weekendPrice ?? '', 'Weekend 24h price');
+  const weErr = validateWeekdayOrWeekendPrice(input.weekendPrice ?? '', 'Weekend 24h price');
   if (weErr) return weErr;
 
   const phErr = validateContactPhone(input.contactPhone ?? '');
@@ -413,7 +454,8 @@ function validateFarmCorePayload(input: FarmCorePayload): string | null {
   if (emErr) return emErr;
 
   if (input.rating != null && input.rating !== undefined) {
-    if (typeof input.rating !== 'number' || Number.isNaN(input.rating)) return 'Rating must be a number.';
+    if (typeof input.rating !== 'number' || Number.isNaN(input.rating))
+      return 'Rating must be a number.';
     if (input.rating < 0 || input.rating > 5) return 'Rating must be between 0 and 5.';
     const str = String(input.rating);
     if (!/^\d+(\.\d+)?$/.test(str)) return 'Rating must be a valid number.';
