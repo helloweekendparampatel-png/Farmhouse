@@ -25,47 +25,191 @@ Defined in `frontend/prisma/schema.prisma`:
 
 ### Setup
 
-1. **Install dependencies**
+#### 1. New Project Setup (Fresh Installation)
 
-   ```bash
-   cd frontend
-   npm install
-   ```
+```bash
+# Clone or navigate to the project
+cd /path/to/Farmhouse
 
-2. **Configure environment**
+# Install dependencies
+npm install
 
-   Create `frontend/.env`:
+# Configure environment variables
+# Copy or create .env.local with your database credentials
+# Example:
+# DATABASE_URL="postgresql://user:password@localhost:5432/farmhouse?sslmode=require"
+# JWT_SECRET=your-strong-secret-key
+# PORT=3000
 
-   ```env
-   DATABASE_URL="postgresql://postgres:postgres@localhost:5432/farmhouse?schema=public"
-   JWT_SECRET=your-strong-secret
-   ```
+# Generate Prisma Client
+npx prisma generate
 
-   Make sure the `farmhouse` database exists and Postgres is running.
+# Create and apply initial migration
+npx prisma migrate dev --name init
 
-3. **Prisma generate & migrate**
+# Seed database with initial data (if seed script exists)
+# npx ts-node prisma/seed.ts
 
-   Common commands (run in `frontend`):
+# Start the development server
+npm run dev
+```
 
-   ```bash
-   # generate Prisma client (run after changing schema.prisma)
-   npx prisma generate
+The app will be available at `http://localhost:3000` (or your configured PORT).
 
-   # create / apply migrations in development
-   npx prisma migrate dev --name init
+#### 2. Database Setup & Configuration
 
-   # open Prisma Studio (GUI to inspect/edit data)
-   npx prisma studio
-   ```
+**Prerequisites:**
+- PostgreSQL 12+ running locally or remote
+- Database credentials (host, port, user, password, database name)
 
-4. **Run the app**
+**Environment Variables (`.env.local`):**
 
-   ```bash
-   cd frontend
-   npm run dev
-   ```
+```env
+DATABASE_URL="postgresql://USERNAME:PASSWORD@HOST:PORT/DATABASE_NAME?sslmode=require"
+JWT_SECRET=your-very-strong-secret-key
+PORT=3000
+```
 
-   The app will be available at `http://localhost:3001` (by default).
+**Verify Database Connection:**
+
+```bash
+# Open Prisma Studio to view/edit data
+npx prisma studio
+
+# Check connection and current schema
+npx prisma db execute --stdin < /dev/null
+```
+
+#### 3. Adding New Fields to Schema (Without Losing Data)
+
+When you need to add new columns, fields, or make schema changes, follow these steps to preserve existing data:
+
+**Step 1: Update Schema**
+
+Edit `prisma/schema.prisma` and add your new fields to the appropriate model:
+
+```prisma
+model Farm {
+  id              String   @id @default(uuid())
+  name            String
+  // ... existing fields ...
+  
+  // Add your new fields here
+  newField1       String?
+  newField2       Int?
+  weekday6hPrice  String?
+  weekend6hPrice  String?
+}
+```
+
+**Step 2: Push Changes to Database (Recommended for Development)**
+
+```bash
+# This applies schema changes directly without strict migration history
+# All existing data is preserved
+npx prisma db push
+```
+
+**Step 3: Generate Updated Prisma Client**
+
+```bash
+npx prisma generate
+```
+
+**Step 4: (Optional) Create a Proper Migration**
+
+If you want to create a formal migration file for version control:
+
+```bash
+# Create and apply migration in one command
+npx prisma migrate dev --name describe_your_changes
+
+# Example:
+npx prisma migrate dev --name add_price_durations_6h_12h
+```
+
+**Step 5: Verify Changes**
+
+```bash
+# Check current schema matches Prisma schema
+npx prisma db execute --stdin < /dev/null
+
+# View data in Studio
+npx prisma studio
+```
+
+#### 4. Common Prisma Commands
+
+```bash
+# Generate Prisma Client (run after schema changes)
+npx prisma generate
+
+# Push schema to database (development - no strict migration history)
+npx prisma db push
+
+# Create and apply migration (production-ready)
+npx prisma migrate dev --name migration_name
+
+# Deploy migrations (apply pending migrations)
+npx prisma migrate deploy
+
+# Resolve failed migrations (if migration fails)
+npx prisma migrate resolve --rolled-back migration_name
+
+# Open Prisma Studio UI
+npx prisma studio
+
+# Show migration history
+npx prisma migrate status
+
+# Reset database (CAUTION: deletes all data)
+npx prisma migrate reset
+
+# Seed database with sample data
+npx ts-node prisma/seed.ts
+```
+
+#### 5. Development Workflow
+
+```bash
+# After cloning or getting fresh code
+npm install
+npx prisma generate
+
+# When you modify prisma/schema.prisma
+npx prisma db push          # For development (preserves data)
+# OR
+npx prisma migrate dev --name description  # For production (creates migration file)
+
+# After any schema changes, regenerate types
+npx prisma generate
+
+# Restart dev server
+npm run dev
+```
+
+#### 6. Troubleshooting
+
+**Database connection issues:**
+```bash
+# Test connection string format
+# PostgreSQL: postgresql://user:password@host:port/dbname?sslmode=require
+```
+
+**Migration conflicts:**
+```bash
+# If migration fails, mark it as rolled back
+npx prisma migrate resolve --rolled-back migration_name
+
+# Then create a new migration
+npx prisma migrate dev --name fix_description
+```
+
+**Data out of sync:**
+```bash
+# If database schema doesn't match Prisma schema
+npx prisma db push  # Safe for development
+```
 
 ### Auth & login
 

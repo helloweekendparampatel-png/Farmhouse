@@ -42,6 +42,10 @@ type FarmDetail = {
   discount?: string;
   weekdayPrice?: string;
   weekendPrice?: string;
+  weekday6hPrice?: string;
+  weekend6hPrice?: string;
+  weekday12hPrice?: string;
+  weekend12hPrice?: string;
   thumbnailUrl?: string | null;
   images?: FarmImageRow[];
 };
@@ -76,6 +80,10 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
   const [rulesText, setRulesText] = useState('');
   const [weekdayPrice, setWeekdayPrice] = useState('');
   const [weekendPrice, setWeekendPrice] = useState('');
+  const [weekday6hPrice, setWeekday6hPrice] = useState('');
+  const [weekend6hPrice, setWeekend6hPrice] = useState('');
+  const [weekday12hPrice, setWeekday12hPrice] = useState('');
+  const [weekend12hPrice, setWeekend12hPrice] = useState('');
   const [contactPhone, setContactPhone] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [discount, setDiscount] = useState('');
@@ -157,6 +165,10 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
         setRulesText((data.rules ?? []).join('\n'));
         setWeekdayPrice(normalizeRangeMoney(data.weekdayPrice ?? ''));
         setWeekendPrice(normalizeRangeMoney(data.weekendPrice ?? ''));
+        setWeekday6hPrice(normalizeRangeMoney(data.weekday6hPrice ?? ''));
+        setWeekend6hPrice(normalizeRangeMoney(data.weekend6hPrice ?? ''));
+        setWeekday12hPrice(normalizeRangeMoney(data.weekday12hPrice ?? ''));
+        setWeekend12hPrice(normalizeRangeMoney(data.weekend12hPrice ?? ''));
         setContactPhone(data.contactPhone ?? '');
         setContactEmail(data.contactEmail ?? '');
         setDiscount(data.discount ?? '');
@@ -193,6 +205,10 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
       rulesText,
       weekdayPrice,
       weekendPrice,
+      weekday6hPrice,
+      weekend6hPrice,
+      weekday12hPrice,
+      weekend12hPrice,
       contactPhone,
       contactEmail,
       discount,
@@ -242,10 +258,18 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
         .filter(Boolean);
 
       const pricing =
-        weekdayPrice || weekendPrice
+        weekdayPrice || weekendPrice || weekday6hPrice || weekend6hPrice || weekday12hPrice || weekend12hPrice
           ? {
-              weekday: weekdayPrice ? { '24 Hours': weekdayPrice } : {},
-              weekend: weekendPrice ? { '24 Hours': weekendPrice } : {},
+              weekday: {
+                ...(weekdayPrice ? { '24 Hours': weekdayPrice } : {}),
+                ...(weekday6hPrice ? { '6 Hours': weekday6hPrice } : {}),
+                ...(weekday12hPrice ? { '12 Hours': weekday12hPrice } : {}),
+              },
+              weekend: {
+                ...(weekendPrice ? { '24 Hours': weekendPrice } : {}),
+                ...(weekend6hPrice ? { '6 Hours': weekend6hPrice } : {}),
+                ...(weekend12hPrice ? { '12 Hours': weekend12hPrice } : {}),
+              },
             }
           : undefined;
 
@@ -292,6 +316,10 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
         discount: discount.trim() || null,
         weekdayPrice: weekdayPrice.trim(),
         weekendPrice: weekendPrice.trim(),
+        weekday6hPrice: weekday6hPrice.trim(),
+        weekend6hPrice: weekend6hPrice.trim(),
+        weekday12hPrice: weekday12hPrice.trim(),
+        weekend12hPrice: weekend12hPrice.trim(),
         ...(thumbnailImageUrl !== undefined ? { thumbnailImageUrl } : {}),
         ...(shouldUpdateGallery ? { photoImageUrls: galleryUrls } : {}),
       });
@@ -541,6 +569,36 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
             </label>
             <label>
               <span className="field-label">
+                Weekday 6h Price
+              </span>
+              <input
+                type="text"
+                placeholder="e.g. 2000-3000"
+                value={weekday6hPrice}
+                onChange={(e) => setWeekday6hPrice(e.target.value)}
+                className={err('weekday6hPrice') ? 'field-error' : ''}
+              />
+              {err('weekday6hPrice') && (
+                <span className="field-error-text">{err('weekday6hPrice')}</span>
+              )}
+            </label>
+            <label>
+              <span className="field-label">
+                Weekday 12h Price
+              </span>
+              <input
+                type="text"
+                placeholder="e.g. 2500-4000"
+                value={weekday12hPrice}
+                onChange={(e) => setWeekday12hPrice(e.target.value)}
+                className={err('weekday12hPrice') ? 'field-error' : ''}
+              />
+              {err('weekday12hPrice') && (
+                <span className="field-error-text">{err('weekday12hPrice')}</span>
+              )}
+            </label>
+            <label>
+              <span className="field-label">
                 Weekend 24h Price <span className="field-required">*</span>
               </span>
               <input
@@ -552,6 +610,36 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
               />
               {err('weekendPrice') && (
                 <span className="field-error-text">{err('weekendPrice')}</span>
+              )}
+            </label>
+            <label>
+              <span className="field-label">
+                Weekend 6h Price
+              </span>
+              <input
+                type="text"
+                placeholder="e.g. 3500-4500"
+                value={weekend6hPrice}
+                onChange={(e) => setWeekend6hPrice(e.target.value)}
+                className={err('weekend6hPrice') ? 'field-error' : ''}
+              />
+              {err('weekend6hPrice') && (
+                <span className="field-error-text">{err('weekend6hPrice')}</span>
+              )}
+            </label>
+            <label>
+              <span className="field-label">
+                Weekend 12h Price
+              </span>
+              <input
+                type="text"
+                placeholder="e.g. 4000-5500"
+                value={weekend12hPrice}
+                onChange={(e) => setWeekend12hPrice(e.target.value)}
+                className={err('weekend12hPrice') ? 'field-error' : ''}
+              />
+              {err('weekend12hPrice') && (
+                <span className="field-error-text">{err('weekend12hPrice')}</span>
               )}
             </label>
             <label>
