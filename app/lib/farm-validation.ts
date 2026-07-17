@@ -68,6 +68,10 @@ export type FarmFormStrings = {
   rulesText: string;
   weekdayPrice: string;
   weekendPrice: string;
+  weekday6hPrice: string;
+  weekend6hPrice: string;
+  weekday12hPrice: string;
+  weekend12hPrice: string;
   contactPhone: string;
   contactEmail: string;
   discount: string;
@@ -387,6 +391,10 @@ type FarmCorePayload = {
   discount?: string | null;
   weekdayPrice?: string | null;
   weekendPrice?: string | null;
+  weekday6hPrice?: string | null;
+  weekend6hPrice?: string | null;
+  weekday12hPrice?: string | null;
+  weekend12hPrice?: string | null;
 };
 
 function validateFarmCorePayload(input: FarmCorePayload): string | null {
@@ -452,6 +460,26 @@ function validateFarmCorePayload(input: FarmCorePayload): string | null {
   if (wdErr) return wdErr;
   const weErr = validateWeekdayOrWeekendPrice(input.weekendPrice ?? '', 'Weekend 24h price');
   if (weErr) return weErr;
+
+  // Optional 6-hour prices
+  if (input.weekday6hPrice) {
+    const wd6Err = validateWeekdayOrWeekendPrice(input.weekday6hPrice, 'Weekday 6h price');
+    if (wd6Err) return wd6Err;
+  }
+  if (input.weekend6hPrice) {
+    const we6Err = validateWeekdayOrWeekendPrice(input.weekend6hPrice, 'Weekend 6h price');
+    if (we6Err) return we6Err;
+  }
+
+  // Optional 12-hour prices
+  if (input.weekday12hPrice) {
+    const wd12Err = validateWeekdayOrWeekendPrice(input.weekday12hPrice, 'Weekday 12h price');
+    if (wd12Err) return wd12Err;
+  }
+  if (input.weekend12hPrice) {
+    const we12Err = validateWeekdayOrWeekendPrice(input.weekend12hPrice, 'Weekend 12h price');
+    if (we12Err) return we12Err;
+  }
 
   const phErr = validateContactPhone(input.contactPhone ?? '');
   if (phErr) return phErr;

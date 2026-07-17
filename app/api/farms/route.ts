@@ -86,6 +86,10 @@ export async function POST(req: NextRequest) {
       discount?: string | null;
       weekdayPrice?: string | null;
       weekendPrice?: string | null;
+      weekday6hPrice?: string | null;
+      weekend6hPrice?: string | null;
+      weekday12hPrice?: string | null;
+      weekend12hPrice?: string | null;
       thumbnailImageUrl?: string | null;
       photoImageUrls?: string[];
     }[];
@@ -160,6 +164,10 @@ export async function POST(req: NextRequest) {
               discount: f.discount ?? undefined,
               weekdayPrice: f.weekdayPrice ?? undefined,
               weekendPrice: f.weekendPrice ?? undefined,
+              weekday6hPrice: f.weekday6hPrice ?? undefined,
+              weekend6hPrice: f.weekend6hPrice ?? undefined,
+              weekday12hPrice: f.weekday12hPrice ?? undefined,
+              weekend12hPrice: f.weekend12hPrice ?? undefined,
             },
           });
           createdFarms.push(farm);
@@ -167,7 +175,7 @@ export async function POST(req: NextRequest) {
 
         return createdFarms;
       },
-      { timeout: 15000 },
+      { timeout: 30000 },
     );
 
     return NextResponse.json(results, { status: 201 });
