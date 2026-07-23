@@ -46,11 +46,15 @@ model Farm {
   contactPhone String?
   contactEmail String?
   isPopular    Boolean       @default(false)
-  discount     String?
-  weekdayPrice String?
-  weekendPrice String?
-  ownerId      String
-  owner        User          @relation("UserFarms", fields: [ownerId], references: [id])
+  discount        String?
+  weekdayPrice    String?
+  weekendPrice    String?
+  weekday6hPrice  String?
+  weekend6hPrice  String?
+  weekday12hPrice String?
+  weekend12hPrice String?
+  ownerId         String
+  owner           User          @relation("UserFarms", fields: [ownerId], references: [id])
   images       FarmImage[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt

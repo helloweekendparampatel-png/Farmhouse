@@ -65,6 +65,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     discount?: string | null;
     weekdayPrice?: string | null;
     weekendPrice?: string | null;
+    weekday6hPrice?: string | null;
+    weekend6hPrice?: string | null;
+    weekday12hPrice?: string | null;
+    weekend12hPrice?: string | null;
     thumbnailImageUrl?: string | null;
     /** When set, replaces all gallery images (FarmImage rows). Min 10 URLs expected for listings. */
     photoImageUrls?: string[] | null;
@@ -88,6 +92,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     discount: body.discount ?? undefined,
     weekdayPrice: body.weekdayPrice ?? undefined,
     weekendPrice: body.weekendPrice ?? undefined,
+    weekday6hPrice: body.weekday6hPrice ?? undefined,
+    weekend6hPrice: body.weekend6hPrice ?? undefined,
+    weekday12hPrice: body.weekday12hPrice ?? undefined,
+    weekend12hPrice: body.weekend12hPrice ?? undefined,
   });
   if (updateErr) {
     return NextResponse.json({ message: updateErr }, { status: 400 });
@@ -151,6 +159,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       ...(body.discount !== undefined ? { discount: body.discount } : {}),
       ...(body.weekdayPrice !== undefined ? { weekdayPrice: body.weekdayPrice } : {}),
       ...(body.weekendPrice !== undefined ? { weekendPrice: body.weekendPrice } : {}),
+      ...(body.weekday6hPrice !== undefined ? { weekday6hPrice: body.weekday6hPrice } : {}),
+      ...(body.weekend6hPrice !== undefined ? { weekend6hPrice: body.weekend6hPrice } : {}),
+      ...(body.weekday12hPrice !== undefined ? { weekday12hPrice: body.weekday12hPrice } : {}),
+      ...(body.weekend12hPrice !== undefined ? { weekend12hPrice: body.weekend12hPrice } : {}),
       ...(body.thumbnailImageUrl !== undefined
         ? {
             thumbnailUrl:
