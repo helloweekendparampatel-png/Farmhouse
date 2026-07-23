@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/prisma/client';
 import { Role } from '@prisma/client';
-import { requireAuth, requireRole } from '../_lib/auth';
+import { requireRole } from '../_lib/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
-  try {
-    requireAuth(req);
-  } catch (err: any) {
-    return NextResponse.json({ message: err.message || 'Unauthorized' }, { status: 401 });
-  }
-
   const photos = await prisma.photography.findMany({
     include: { images: true },
   });

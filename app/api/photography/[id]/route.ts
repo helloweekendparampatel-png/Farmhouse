@@ -5,17 +5,11 @@ import {
   deleteStoredImagesFromS3,
   removedImageUrlsAfterPatch,
 } from '@/app/lib/upload-storage';
-import { requireAuth, requireRole } from '../../_lib/auth';
+import { requireRole } from '../../_lib/auth';
 
 type Params = { params: { id: string } };
 
 export async function GET(req: NextRequest, { params }: Params) {
-  try {
-    requireAuth(req);
-  } catch (err: any) {
-    return NextResponse.json({ message: err.message || 'Unauthorized' }, { status: 401 });
-  }
-
   const photo = await prisma.photography.findUnique({
     where: { id: params.id },
     include: { images: true },
