@@ -16,6 +16,7 @@ import { HeaderLink, PageIntro, SectionCard } from '../ui/admin-ui';
 type Farm = {
   id: string;
   name: string;
+  category?: string;
   slug?: string | null;
   thumbnailUrl?: string | null;
   location?: string;
@@ -139,6 +140,7 @@ export default function FarmsPage() {
               <tr>
                 <th aria-label="Thumbnail" />
                 <th>Name</th>
+                <th>Category</th>
                 <th>Slug</th>
                 <th>Location</th>
                 <th>Description</th>
@@ -153,7 +155,7 @@ export default function FarmsPage() {
             <tbody>
               {farms.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="empty-state">
+                  <td colSpan={11} className="empty-state">
                     No farms found.
                   </td>
                 </tr>
@@ -178,6 +180,7 @@ export default function FarmsPage() {
                       )}
                     </td>
                     <td className="cell-title">{farm.name}</td>
+                    <td>{farm.category || 'Farmhouse'}</td>
                     <td className="cell-slug">{farm.slug?.trim() || '—'}</td>
                     <td>{farm.location || '—'}</td>
                     <td

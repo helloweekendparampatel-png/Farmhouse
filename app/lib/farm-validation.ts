@@ -1,4 +1,5 @@
 import { normalizeAmenitiesForStorage, parseStoredAmenity, type AmenityPayload } from './amenities';
+import { isFarmCategory } from './farm-categories';
 
 function normalizeFieldString(value: unknown): string {
   if (value === null || value === undefined) return '';
@@ -55,6 +56,7 @@ export const FARM_LIMITS = {
 
 export type FarmFormStrings = {
   name: string;
+  category: string;
   location: string;
   description: string;
   price: string;
@@ -257,6 +259,8 @@ export function collectCreateFarmFieldErrors(
   const nameErr = validateRequiredText(s.name, 'Name', FARM_LIMITS.name, 2);
   if (nameErr) errs.name = nameErr;
 
+  if (!isFarmCategory(s.category)) errs.category = 'Please select a valid category.';
+
   const locErr = validateRequiredText(s.location, 'Location', FARM_LIMITS.location, 2);
   if (locErr) errs.location = locErr;
 
@@ -319,6 +323,8 @@ export function collectCreateFarmFieldErrors(
 export function collectEditFarmFieldErrors(s: FarmFormStrings): Record<string, string> {
   const errs: Record<string, string> = {};
 
+  if (!isFarmCategory(s.category)) errs.category = 'Please select a valid category.';
+
   const nameErr = validateRequiredText(s.name, 'Name', FARM_LIMITS.name, 2);
   if (nameErr) errs.name = nameErr;
 
@@ -375,6 +381,7 @@ export function collectEditFarmFieldErrors(s: FarmFormStrings): Record<string, s
 
 type FarmCorePayload = {
   name?: string;
+  category?: string;
   location?: string | null;
   description?: string | null;
   price?: string | null;
@@ -402,6 +409,10 @@ function validateFarmCorePayload(input: FarmCorePayload): string | null {
   if (!name) return 'Name is required.';
   if (name.length < 2) return 'Name must be at least 2 characters.';
   if (name.length > FARM_LIMITS.name) return `Name must be ${FARM_LIMITS.name} characters or less.`;
+
+  if (input.category !== undefined && !isFarmCategory(input.category)) {
+    return 'Please select a valid category.';
+  }
 
   const locErr = validateRequiredText(input.location ?? '', 'Location', FARM_LIMITS.location, 2);
   if (locErr) return locErr;
@@ -514,6 +525,8 @@ export function validateFarmCreatePayload(
     photoImageUrls?: string[];
   },
 ): string | null {
+  if (!isFarmCategory(input.category)) return 'Category is required.';
+
   const core = validateFarmCorePayload(input);
   if (core) return core;
 

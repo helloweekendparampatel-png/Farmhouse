@@ -18,12 +18,14 @@ import { AmenityLucideIcon } from '../../../components/AmenityLucideIcon';
 import { FileUploadControl } from '../../../components/FileUploadControl';
 import { mediaSrc } from '../../../lib/media-url';
 import { HeaderLink, PageIntro, SectionCard } from '../../../ui/admin-ui';
+import { FARM_CATEGORIES } from '../../../lib/farm-categories';
 
 type FarmImageRow = { id: string; imageUrl: string; farmId: string };
 
 type FarmDetail = {
   id: string;
   name: string;
+  category?: string;
   location?: string;
   description?: string;
   price?: string;
@@ -66,6 +68,7 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
   const [submitting, setSubmitting] = useState(false);
 
   const [name, setName] = useState('');
+  const [category, setCategory] = useState<string>(FARM_CATEGORIES[0]);
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
@@ -131,6 +134,7 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
       try {
         const data = await apiGet<FarmDetail>(`/farms/${params.slug}`, token);
         setName(data.name ?? '');
+        setCategory(data.category ?? FARM_CATEGORIES[0]);
         setLocation(data.location ?? '');
         setDescription(data.description ?? '');
         const normalizeMoney = (raw?: string | null) => {
@@ -147,7 +151,10 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
 
         const normalizeRangeMoney = (raw?: string | null) => {
           if (!raw) return '';
-          return String(raw).trim().replace(/[$€£₹]/gu, '').replace(/,/g, '');
+          return String(raw)
+            .trim()
+            .replace(/[$€£₹]/gu, '')
+            .replace(/,/g, '');
         };
 
         setPrice(normalizeMoney(data.price ?? ''));
@@ -192,6 +199,7 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
   const validate = () => {
     const form: FarmFormStrings = {
       name,
+      category,
       location,
       description,
       price,
@@ -258,7 +266,12 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
         .filter(Boolean);
 
       const pricing =
-        weekdayPrice || weekendPrice || weekday6hPrice || weekend6hPrice || weekday12hPrice || weekend12hPrice
+        weekdayPrice ||
+        weekendPrice ||
+        weekday6hPrice ||
+        weekend6hPrice ||
+        weekday12hPrice ||
+        weekend12hPrice
           ? {
               weekday: {
                 ...(weekdayPrice ? { '24 Hours': weekdayPrice } : {}),
@@ -298,6 +311,7 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
 
       await apiPatch(`/farms/${params.slug}`, token, {
         name: name.trim(),
+        category,
         location: location.trim(),
         description: description.trim(),
         price: price.trim(),
@@ -362,6 +376,23 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
                 className={err('name') ? 'field-error' : ''}
               />
               {err('name') && <span className="field-error-text">{err('name')}</span>}
+            </label>
+            <label>
+              <span className="field-label">
+                Category <span className="field-required">*</span>
+              </span>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className={err('category') ? 'field-error' : ''}
+              >
+                {FARM_CATEGORIES.map((farmCategory) => (
+                  <option key={farmCategory} value={farmCategory}>
+                    {farmCategory}
+                  </option>
+                ))}
+              </select>
+              {err('category') && <span className="field-error-text">{err('category')}</span>}
             </label>
             <label>
               <span className="field-label">
@@ -568,9 +599,7 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
               )}
             </label>
             <label>
-              <span className="field-label">
-                Weekday 6h Price
-              </span>
+              <span className="field-label">Weekday 6h Price</span>
               <input
                 type="text"
                 placeholder="e.g. 2000-3000"
@@ -583,9 +612,7 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
               )}
             </label>
             <label>
-              <span className="field-label">
-                Weekday 12h Price
-              </span>
+              <span className="field-label">Weekday 12h Price</span>
               <input
                 type="text"
                 placeholder="e.g. 2500-4000"
@@ -613,9 +640,7 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
               )}
             </label>
             <label>
-              <span className="field-label">
-                Weekend 6h Price
-              </span>
+              <span className="field-label">Weekend 6h Price</span>
               <input
                 type="text"
                 placeholder="e.g. 3500-4500"
@@ -628,9 +653,7 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
               )}
             </label>
             <label>
-              <span className="field-label">
-                Weekend 12h Price
-              </span>
+              <span className="field-label">Weekend 12h Price</span>
               <input
                 type="text"
                 placeholder="e.g. 4000-5500"

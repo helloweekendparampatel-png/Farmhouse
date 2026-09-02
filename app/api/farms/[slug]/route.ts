@@ -47,6 +47,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   const body = (await req.json()) as {
     name?: string;
+    category?: string;
     location?: string | null;
     description?: string | null;
     price?: string | null;
@@ -76,6 +77,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   const updateErr = validateFarmUpdatePayload({
     name: body.name,
+    category: body.category,
     location: body.location ?? undefined,
     description: body.description ?? undefined,
     price: body.price ?? undefined,
@@ -137,6 +139,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     where: { id: existing.id },
     data: {
       ...(body.name !== undefined ? { name: body.name } : {}),
+      ...(body.category !== undefined ? { category: body.category } : {}),
       ...(body.location !== undefined ? { location: body.location } : {}),
       ...(body.description !== undefined ? { description: body.description } : {}),
       ...(body.price !== undefined ? { price: body.price } : {}),

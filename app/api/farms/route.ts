@@ -68,6 +68,7 @@ export async function POST(req: NextRequest) {
   const body = (await req.json()) as {
     farms?: {
       name?: string;
+      category?: string;
       location?: string | null;
       description?: string | null;
       price?: string | null;
@@ -141,6 +142,7 @@ export async function POST(req: NextRequest) {
             data: {
               slug: nextSlug,
               name,
+              category: f.category,
               thumbnailUrl,
               location: f.location ?? undefined,
               description: f.description ?? undefined,

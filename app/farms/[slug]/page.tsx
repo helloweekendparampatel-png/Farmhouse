@@ -18,6 +18,7 @@ type FarmImageRow = { id: string; imageUrl: string; farmId: string };
 type FarmDetail = {
   id: string;
   name: string;
+  category?: string;
   location?: string;
   description?: string;
   price?: string;
@@ -104,6 +105,7 @@ export default function FarmDetailPage({ params }: { params: { slug: string } })
               value={farm.isPopular ? 'Popular' : 'Standard'}
               meta={farm.discount || 'No discount label'}
             />
+            <StatCard label="Category" value={farm.category || 'Farmhouse'} meta="Property type" />
           </div>
 
           {farm.thumbnailUrl ? (

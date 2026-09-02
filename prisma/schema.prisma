@@ -26,6 +26,7 @@ model Farm {
   id           String        @id @default(uuid())
   slug         String?       @unique
   name         String
+  category     String        @default("Farmhouse")
   thumbnailUrl String?
   location     String?
   description  String?

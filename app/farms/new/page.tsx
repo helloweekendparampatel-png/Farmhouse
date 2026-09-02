@@ -14,6 +14,7 @@ import { IconPicker } from '../../components/IconPicker';
 import { AmenityLucideIcon } from '../../components/AmenityLucideIcon';
 import { FileUploadControl } from '../../components/FileUploadControl';
 import { HeaderLink, PageIntro, SectionCard } from '../../ui/admin-ui';
+import { FARM_CATEGORIES } from '../../lib/farm-categories';
 
 function fileKey(f: File) {
   return `${f.name}-${f.size}-${f.lastModified}`;
@@ -21,6 +22,7 @@ function fileKey(f: File) {
 
 type FarmFormValues = {
   name: string;
+  category: string;
   location: string;
   description: string;
   price: string;
@@ -45,6 +47,7 @@ type FarmFormValues = {
 
 const initialValues: FarmFormValues = {
   name: '',
+  category: FARM_CATEGORIES[0],
   location: '',
   description: '',
   price: '',
@@ -115,6 +118,7 @@ export default function NewFarmPage() {
     validate: (values: FarmFormValues): Partial<Record<string, string>> => {
       const form: FarmFormStrings = {
         name: values.name,
+        category: values.category,
         location: values.location,
         description: values.description,
         price: values.price,
@@ -189,41 +193,42 @@ export default function NewFarmPage() {
 
         const pricing =
           normalizedFieldValue(values.weekdayPrice) ||
-            normalizedFieldValue(values.weekendPrice) ||
-            normalizedFieldValue(values.weekday6hPrice) ||
-            normalizedFieldValue(values.weekend6hPrice) ||
-            normalizedFieldValue(values.weekday12hPrice) ||
-            normalizedFieldValue(values.weekend12hPrice)
+          normalizedFieldValue(values.weekendPrice) ||
+          normalizedFieldValue(values.weekday6hPrice) ||
+          normalizedFieldValue(values.weekend6hPrice) ||
+          normalizedFieldValue(values.weekday12hPrice) ||
+          normalizedFieldValue(values.weekend12hPrice)
             ? {
-              weekday: {
-                ...(normalizedFieldValue(values.weekdayPrice)
-                  ? { '24 Hours': normalizedFieldValue(values.weekdayPrice) }
-                  : {}),
-                ...(normalizedFieldValue(values.weekday6hPrice)
-                  ? { '6 Hours': normalizedFieldValue(values.weekday6hPrice) }
-                  : {}),
-                ...(normalizedFieldValue(values.weekday12hPrice)
-                  ? { '12 Hours': normalizedFieldValue(values.weekday12hPrice) }
-                  : {}),
-              },
-              weekend: {
-                ...(normalizedFieldValue(values.weekendPrice)
-                  ? { '24 Hours': normalizedFieldValue(values.weekendPrice) }
-                  : {}),
-                ...(normalizedFieldValue(values.weekend6hPrice)
-                  ? { '6 Hours': normalizedFieldValue(values.weekend6hPrice) }
-                  : {}),
-                ...(normalizedFieldValue(values.weekend12hPrice)
-                  ? { '12 Hours': normalizedFieldValue(values.weekend12hPrice) }
-                  : {}),
-              },
-            }
+                weekday: {
+                  ...(normalizedFieldValue(values.weekdayPrice)
+                    ? { '24 Hours': normalizedFieldValue(values.weekdayPrice) }
+                    : {}),
+                  ...(normalizedFieldValue(values.weekday6hPrice)
+                    ? { '6 Hours': normalizedFieldValue(values.weekday6hPrice) }
+                    : {}),
+                  ...(normalizedFieldValue(values.weekday12hPrice)
+                    ? { '12 Hours': normalizedFieldValue(values.weekday12hPrice) }
+                    : {}),
+                },
+                weekend: {
+                  ...(normalizedFieldValue(values.weekendPrice)
+                    ? { '24 Hours': normalizedFieldValue(values.weekendPrice) }
+                    : {}),
+                  ...(normalizedFieldValue(values.weekend6hPrice)
+                    ? { '6 Hours': normalizedFieldValue(values.weekend6hPrice) }
+                    : {}),
+                  ...(normalizedFieldValue(values.weekend12hPrice)
+                    ? { '12 Hours': normalizedFieldValue(values.weekend12hPrice) }
+                    : {}),
+                },
+              }
             : undefined;
 
         await apiPost('/farms', token, {
           farms: [
             {
               name: normalizedFieldValue(values.name),
+              category: values.category,
               location: normalizedFieldValue(values.location),
               description: normalizedFieldValue(values.description),
               price: normalizedFieldValue(values.price),
@@ -312,6 +317,25 @@ export default function NewFarmPage() {
               className={err('name') ? 'field-error' : ''}
             />
             {err('name') && <span className="field-error-text">{err('name')}</span>}
+          </label>
+          <label>
+            <span className="field-label">
+              Category <span className="field-required">*</span>
+            </span>
+            <select
+              name="category"
+              value={formik.values.category}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className={err('category') ? 'field-error' : ''}
+            >
+              {FARM_CATEGORIES.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+            {err('category') && <span className="field-error-text">{err('category')}</span>}
           </label>
           <label>
             <span className="field-label">
@@ -525,9 +549,7 @@ export default function NewFarmPage() {
             {err('rulesText') && <span className="field-error-text">{err('rulesText')}</span>}
           </label>
           <label>
-            <span className="field-label">
-              Weekday 6h Price
-            </span>
+            <span className="field-label">Weekday 6h Price</span>
             <input
               name="weekday6hPrice"
               type="text"
@@ -537,12 +559,12 @@ export default function NewFarmPage() {
               onBlur={formik.handleBlur}
               className={err('weekday6hPrice') ? 'field-error' : ''}
             />
-            {err('weekday6hPrice') && <span className="field-error-text">{err('weekday6hPrice')}</span>}
+            {err('weekday6hPrice') && (
+              <span className="field-error-text">{err('weekday6hPrice')}</span>
+            )}
           </label>
           <label>
-            <span className="field-label">
-              Weekend 6h Price
-            </span>
+            <span className="field-label">Weekend 6h Price</span>
             <input
               name="weekend6hPrice"
               type="text"
@@ -552,12 +574,12 @@ export default function NewFarmPage() {
               onBlur={formik.handleBlur}
               className={err('weekend6hPrice') ? 'field-error' : ''}
             />
-            {err('weekend6hPrice') && <span className="field-error-text">{err('weekend6hPrice')}</span>}
+            {err('weekend6hPrice') && (
+              <span className="field-error-text">{err('weekend6hPrice')}</span>
+            )}
           </label>
           <label>
-            <span className="field-label">
-              Weekday 12h Price
-            </span>
+            <span className="field-label">Weekday 12h Price</span>
             <input
               name="weekday12hPrice"
               type="text"
@@ -567,12 +589,12 @@ export default function NewFarmPage() {
               onBlur={formik.handleBlur}
               className={err('weekday12hPrice') ? 'field-error' : ''}
             />
-            {err('weekday12hPrice') && <span className="field-error-text">{err('weekday12hPrice')}</span>}
+            {err('weekday12hPrice') && (
+              <span className="field-error-text">{err('weekday12hPrice')}</span>
+            )}
           </label>
           <label>
-            <span className="field-label">
-              Weekend 12h Price
-            </span>
+            <span className="field-label">Weekend 12h Price</span>
             <input
               name="weekend12hPrice"
               type="text"
@@ -582,7 +604,9 @@ export default function NewFarmPage() {
               onBlur={formik.handleBlur}
               className={err('weekend12hPrice') ? 'field-error' : ''}
             />
-            {err('weekend12hPrice') && <span className="field-error-text">{err('weekend12hPrice')}</span>}
+            {err('weekend12hPrice') && (
+              <span className="field-error-text">{err('weekend12hPrice')}</span>
+            )}
           </label>
 
           <label>
@@ -601,7 +625,6 @@ export default function NewFarmPage() {
             {err('weekdayPrice') && <span className="field-error-text">{err('weekdayPrice')}</span>}
           </label>
 
-
           <label>
             <span className="field-label">
               Weekend 24h Price <span className="field-required">*</span>
@@ -617,7 +640,6 @@ export default function NewFarmPage() {
             />
             {err('weekendPrice') && <span className="field-error-text">{err('weekendPrice')}</span>}
           </label>
-
 
           <label>
             <span className="field-label">
