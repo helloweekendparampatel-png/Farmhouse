@@ -7,6 +7,7 @@ import { validateFarmCreatePayload } from '@/app/lib/farm-validation';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
+
   const page = parseInt(searchParams.get('page') || '1', 10);
   const limit = parseInt(searchParams.get('limit') || '15', 10);
   const skip = (page - 1) * limit;
@@ -15,14 +16,14 @@ export async function GET(req: NextRequest) {
 
   const where = search
     ? {
-        OR: [
-          { name: { contains: search, mode: 'insensitive' as const } },
-          { category: { contains: search, mode: 'insensitive' as const } },
-          { slug: { contains: search, mode: 'insensitive' as const } },
-          { location: { contains: search, mode: 'insensitive' as const } },
-          { description: { contains: search, mode: 'insensitive' as const } },
-        ],
-      }
+      OR: [
+        { name: { contains: search, mode: 'insensitive' as const } },
+        { category: { contains: search, mode: 'insensitive' as const } },
+        { slug: { contains: search, mode: 'insensitive' as const } },
+        { location: { contains: search, mode: 'insensitive' as const } },
+        { description: { contains: search, mode: 'insensitive' as const } },
+      ],
+    }
     : {};
 
   const [farms, total] = await Promise.all([
@@ -30,17 +31,27 @@ export async function GET(req: NextRequest) {
       where,
       skip,
       take: limit,
-      orderBy: [{ slug: { sort: 'asc', nulls: 'last' } }, { name: 'asc' }],
-      include: {
-        images: {
-          select: {
-            id: true,
-            imageUrl: true,
-            farmId: true,
-          },
-        },
+
+      orderBy: [
+        { slug: { sort: 'asc', nulls: 'last' } },
+        { name: 'asc' },
+      ],
+
+      select: {
+        capacity: true,
+        category: true,
+        discount: true,
+        location: true,
+        name: true,
+        originalPrice: true,
+        price: true,
+        rating: true,
+        reviews: true,
+        slug: true,
+        thumbnailUrl: true,
       },
     }),
+
     prisma.farm.count({ where }),
   ]);
 
@@ -54,7 +65,6 @@ export async function GET(req: NextRequest) {
     },
   });
 }
-
 export async function POST(req: NextRequest) {
   let payload;
   try {
