@@ -8,6 +8,26 @@ const allowedOrigins = [
 ];
 
 export function middleware(request: NextRequest) {
+  const requestId = crypto.randomUUID();
+  const { pathname, search } = request.nextUrl;
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  const clientIp = forwardedFor?.split(',')[0]?.trim() ?? 'unknown';
+
+  // Render collects stdout, so these structured logs are available in the web
+  // service's Logs tab. Never include request bodies, cookies, or auth headers.
+  console.log(
+    JSON.stringify({
+      level: 'info',
+      event: 'api_request',
+      requestId,
+      method: request.method,
+      path: `${pathname}${search}`,
+      clientIp,
+      userAgent: request.headers.get('user-agent') ?? 'unknown',
+      timestamp: new Date().toISOString(),
+    }),
+  );
+
   // Retrieve the HTTP "Origin" header
   const origin = request.headers.get('origin') ?? '';
 
@@ -23,11 +43,13 @@ export function middleware(request: NextRequest) {
       'Access-Control-Allow-Headers',
       'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
     );
+    preflightHeaders.set('X-Request-Id', requestId);
     return new NextResponse(null, { status: 200, headers: preflightHeaders });
   }
 
   // Retrieve the current response for non-OPTIONS requests
   const response = NextResponse.next();
+  response.headers.set('X-Request-Id', requestId);
 
   // If the origin is in our allowed list, we add it to the response headers
   if (allowedOrigins.includes(origin)) {
