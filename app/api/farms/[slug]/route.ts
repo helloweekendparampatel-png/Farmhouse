@@ -85,7 +85,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     rating: body.rating ?? undefined,
     reviews: body.reviews ?? undefined,
     capacity: body.capacity ?? undefined,
-    features: body.features,
     amenities: body.amenities,
     facilities: body.facilities,
     rules: body.rules,
