@@ -50,7 +50,6 @@ export const FARM_LIMITS = {
   discount: 120,
   phone: 40,
   amenityName: 80,
-  featureItem: 200,
   lineItem: 500,
 } as const;
 
@@ -64,7 +63,6 @@ export type FarmFormStrings = {
   rating: string;
   reviews: string;
   capacity: string;
-  featuresText: string;
   amenities: { name: string }[];
   facilitiesText: string;
   rulesText: string;
@@ -276,9 +274,6 @@ export function collectCreateFarmFieldErrors(
   const capErr = validateCapacityField(s.capacity);
   if (capErr) errs.capacity = capErr;
 
-  const featErr = validateFeaturesFromText(s.featuresText);
-  if (featErr) errs.featuresText = featErr;
-
   const amErr = validateAmenityNames(s.amenities);
   if (amErr) errs.amenities = amErr;
 
@@ -342,9 +337,6 @@ export function collectEditFarmFieldErrors(s: FarmFormStrings): Record<string, s
 
   const capErr = validateCapacityField(s.capacity);
   if (capErr) errs.capacity = capErr;
-
-  const featErr = validateFeaturesFromText(s.featuresText);
-  if (featErr) errs.featuresText = featErr;
 
   const amErr = validateAmenityNames(s.amenities);
   if (amErr) errs.amenities = amErr;
@@ -432,12 +424,6 @@ function validateFarmCorePayload(input: FarmCorePayload): string | null {
 
   const capErr = validateCapacityField(input.capacity ?? '');
   if (capErr) return capErr;
-
-  const features = Array.isArray(input.features) ? input.features : [];
-  const featureStrings = features.map((x) => String(x).trim()).filter(Boolean);
-  if (featureStrings.length === 0) return 'At least one feature is required.';
-  const featErr = validateFeaturesFromText(featureStrings.join('\n'));
-  if (featErr) return featErr;
 
   const amenitiesRaw = Array.isArray(input.amenities) ? input.amenities : [];
   const amenitiesStored = normalizeAmenitiesForStorage(amenitiesRaw);

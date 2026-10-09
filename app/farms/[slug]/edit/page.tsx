@@ -33,7 +33,6 @@ type FarmDetail = {
   rating?: number;
   reviews?: number;
   capacity?: string;
-  features: string[];
   amenities: AmenityItem[];
   facilities: string[];
   pricing?: any;
@@ -76,7 +75,6 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
   const [rating, setRating] = useState('');
   const [reviews, setReviews] = useState('');
   const [capacity, setCapacity] = useState('');
-  const [featuresText, setFeaturesText] = useState('');
   const [amenities, setAmenities] = useState<AmenityItem[]>([{ icon: 'Wifi', name: '' }]);
   const [activeIconIndex, setActiveIconIndex] = useState<number | null>(null);
   const [facilitiesText, setFacilitiesText] = useState('');
@@ -165,7 +163,6 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
         const cap = data.capacity ?? '';
         const capMatch = String(cap).match(/(\d+)/);
         setCapacity(capMatch ? capMatch[1] : String(cap).trim());
-        setFeaturesText((data.features ?? []).join('\n'));
         const amenityRows = (data.amenities ?? []).map((raw) => parseStoredAmenity(raw));
         setAmenities(amenityRows.length ? amenityRows : [{ icon: 'Wifi', name: '' }]);
         setFacilitiesText((data.facilities ?? []).join('\n'));
@@ -207,7 +204,6 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
       rating,
       reviews,
       capacity,
-      featuresText,
       amenities,
       facilitiesText,
       rulesText,
@@ -249,10 +245,6 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
         }
       }
 
-      const features = featuresText
-        .split(/[,\\n]/g)
-        .map((s) => s.trim())
-        .filter(Boolean);
       const amenitiesPayload = amenities
         .filter((a) => a.name.trim())
         .map((a) => ({ icon: a.icon, name: a.name.trim() }));
@@ -319,7 +311,6 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
         rating: rating.trim() ? Number(rating.trim()) : null,
         reviews: reviews.trim() ? Number(reviews.trim()) : null,
         capacity: capacity.trim(),
-        features,
         amenities: amenitiesPayload,
         facilities,
         pricing,
@@ -489,20 +480,6 @@ export default function EditFarmPage({ params }: { params: { slug: string } }) {
                 className={err('capacity') ? 'field-error' : ''}
               />
               {err('capacity') && <span className="field-error-text">{err('capacity')}</span>}
-            </label>
-            <label className="full-width">
-              <span className="field-label">
-                Features (comma or new line) <span className="field-required">*</span>
-              </span>
-              <textarea
-                rows={2}
-                value={featuresText}
-                onChange={(e) => setFeaturesText(e.target.value)}
-                className={err('featuresText') ? 'field-error' : ''}
-              />
-              {err('featuresText') && (
-                <span className="field-error-text">{err('featuresText')}</span>
-              )}
             </label>
             <div className="full-width field-stack">
               <span className="field-label">

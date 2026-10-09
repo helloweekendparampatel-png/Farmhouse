@@ -204,24 +204,10 @@ export default function FarmDetailPage({ params }: { params: { slug: string } })
 
           <section className="list-grid">
             <SectionCard
-              title="Features & amenities"
+              title="Amenities"
               description="Customer-facing property highlights."
             >
               <div className="list-grid">
-                <div className="list-panel">
-                  <h3>Features</h3>
-                  {farm.features && farm.features.length > 0 ? (
-                    <div className="pill-list">
-                      {farm.features.map((f) => (
-                        <span key={f} className="pill">
-                          {f}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p>—</p>
-                  )}
-                </div>
                 <div className="list-panel">
                   <h3>Amenities</h3>
                   {(() => {

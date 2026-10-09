@@ -30,7 +30,6 @@ type FarmFormValues = {
   rating: string;
   reviews: string;
   capacity: string;
-  featuresText: string;
   facilitiesText: string;
   rulesText: string;
   weekdayPrice: string;
@@ -55,7 +54,6 @@ const initialValues: FarmFormValues = {
   rating: '',
   reviews: '',
   capacity: '',
-  featuresText: '',
   facilitiesText: '',
   rulesText: '',
   weekdayPrice: '',
@@ -126,7 +124,6 @@ export default function NewFarmPage() {
         rating: values.rating,
         reviews: values.reviews,
         capacity: values.capacity,
-        featuresText: values.featuresText,
         amenities,
         facilitiesText: values.facilitiesText,
         rulesText: values.rulesText,
@@ -175,10 +172,6 @@ export default function NewFarmPage() {
           }
         }
 
-        const features = values.featuresText
-          .split(/[,\n]/g)
-          .map((s: string) => s.trim())
-          .filter(Boolean);
         const amenitiesPayload = amenities
           .filter((a) => a.name.trim())
           .map((a) => ({ icon: a.icon, name: a.name.trim() }));
@@ -240,7 +233,6 @@ export default function NewFarmPage() {
                 ? Number(normalizedFieldValue(values.reviews))
                 : undefined,
               capacity: normalizedFieldValue(values.capacity),
-              features,
               amenities: amenitiesPayload,
               facilities,
               pricing,
@@ -448,20 +440,6 @@ export default function NewFarmPage() {
               className={err('capacity') ? 'field-error' : ''}
             />
             {err('capacity') && <span className="field-error-text">{err('capacity')}</span>}
-          </label>
-          <label className="full-width">
-            <span className="field-label">
-              Features (comma or new line) <span className="field-required">*</span>
-            </span>
-            <textarea
-              name="featuresText"
-              rows={2}
-              value={formik.values.featuresText}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              className={err('featuresText') ? 'field-error' : ''}
-            />
-            {err('featuresText') && <span className="field-error-text">{err('featuresText')}</span>}
           </label>
           <div className="full-width field-stack">
             <span className="field-label">
