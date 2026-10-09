@@ -203,19 +203,6 @@ export function validateRequiredText(
   return undefined;
 }
 
-export function validateFeaturesFromText(featuresText: unknown): string | undefined {
-  const features = normalizeFieldString(featuresText)
-    .split(/[,\n]/g)
-    .map((x) => x.trim())
-    .filter(Boolean);
-  if (features.length === 0) return 'At least one feature is required.';
-  const tooLong = features.find((f) => f.length > FARM_LIMITS.featureItem);
-  if (tooLong) return `Each feature must be ${FARM_LIMITS.featureItem} characters or less.`;
-  const tooShort = features.find((f) => f.length < 2);
-  if (tooShort) return 'Each feature must be at least 2 characters.';
-  return undefined;
-}
-
 export function validateAmenityNames(amenities: { name: string }[]): string | undefined {
   const named = amenities.map((a) => a.name.trim()).filter(Boolean);
   if (named.length === 0) return 'At least one amenity with a name is required.';
@@ -381,7 +368,6 @@ type FarmCorePayload = {
   rating?: number | null;
   reviews?: number | null;
   capacity?: string | null;
-  features?: string[];
   amenities?: AmenityPayload[];
   facilities?: string[];
   rules?: string[];
